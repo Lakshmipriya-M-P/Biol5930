@@ -1,0 +1,21 @@
+name: Data Cleaning Pipeline
+
+on: [push]
+
+jobs:
+  clean_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+      - name: Install dependencies
+        run: Rscript -e "install.packages('dplyr')"
+      - name: Run data cleaning script
+        run: Rscript scripts/data_cleaning.R
+      - name: Commit cleaned data
+        run: |
+          git add data/processed/
+          git commit -m "Updated cleaned data"
+          git push origin main

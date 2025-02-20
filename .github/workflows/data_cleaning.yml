@@ -20,7 +20,6 @@ jobs:
 
       - name: Run data cleaning script
         run: Rscript scripts/data_cleaning.R
-
       - name: Commit cleaned data
         run: |
           git add data/processed/

@@ -4,20 +4,14 @@ library(lubridate)
 # Load raw data
 raw_data <- read.csv("data/raw/BRF_deer_pellet_data_RAW.csv")
 
-# Debugging: Print column names and first few dates
+# Debug prints for column names and date values
 print("Column names in raw_data:")
 print(colnames(raw_data))
-
 print("First few values in 'date' column:")
 print(head(raw_data$date))
 
-# Ensure 'date' column exists
-if (!"date" %in% colnames(raw_data)) {
-  stop("Error: 'date' column not found in dataset!")
-}
-
-# Convert date column correctly (handle timestamps)
-raw_data$date <- as.Date(as.POSIXct(raw_data$date, format="%Y-%m-%d %H:%M:%S"))
+# Convert 'date' column using lubridate's ymd_hms() function and then convert to Date
+raw_data$date <- as.Date(ymd_hms(raw_data$date))
 
 # Remove duplicates
 clean_data <- raw_data %>% distinct()
@@ -25,9 +19,9 @@ clean_data <- raw_data %>% distinct()
 # Handle missing values
 clean_data[is.na(clean_data)] <- "Unknown"
 
-# Calculate pellet density per hectare (ensure correct column names)
+# Calculate pellet density per hectare (adjust if an area column exists)
 clean_data <- clean_data %>%
-  mutate(Pellet_Density = pellet.count / 1)  # Adjust if necessary
+  mutate(Pellet_Density = pellet.count / 1)
 
 # Save cleaned data
 write.csv(clean_data, "data/processed/BRF_deer_pellet_data_clean.csv", row.names = FALSE)

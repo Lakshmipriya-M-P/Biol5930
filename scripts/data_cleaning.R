@@ -15,18 +15,15 @@ if (!"date" %in% colnames(raw_data)) {
   stop("Error: 'date' column not found in dataset!")
 }
 
-# Convert 'date' to character before processing (fixes NA coercion issues)
+# Convert 'date' column to character before processing (fixes NA coercion issues)
 raw_data$date <- as.character(raw_data$date)
 
-# Ensure that the date format is correctly parsed
-raw_data$date <- parse_date_time(raw_data$date, orders = c("ymd HMS", "ymd"))
+# Parse date to extract the year
+raw_data$year <- year(parse_date_time(raw_data$date, orders = c("ymd HMS", "ymd")))
 
-# Convert to Date format (removing timestamp)
-raw_data$date <- as.Date(raw_data$date)
-
-# Debugging: Check the first few converted date values
-print("First few values in 'date' column after conversion:")
-print(head(raw_data$date))
+# Debugging: Check the first few year values
+print("First few values in 'year' column after conversion:")
+print(head(raw_data$year))
 
 # Remove duplicates
 clean_data <- raw_data %>% distinct()

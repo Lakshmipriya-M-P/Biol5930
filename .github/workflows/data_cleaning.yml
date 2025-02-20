@@ -20,8 +20,13 @@ jobs:
 
       - name: Run data cleaning script
         run: Rscript scripts/data_cleaning.R
-      - name: Commit cleaned data
+        
+      - name: Check for changes before committing
         run: |
           git add data/processed/
-          git commit -m "Updated cleaned data"
-          git push origin main
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Updated cleaned data"
+            git push origin main
+          fi

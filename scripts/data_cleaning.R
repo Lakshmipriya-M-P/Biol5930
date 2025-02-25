@@ -52,6 +52,6 @@ print(paste("Total records after cleaning:", nrow(clean_data)))
 print(paste("Missing values in pellet.count after cleaning:", sum(is.na(clean_data$pellet.count))))
 
 # Save cleaned data
-write.csv(clean_data, "data/processed/BRF_deer_pellet_data_CLEAN.csv", row.names = FALSE)
+write.csv(clean_data, "data/processed/BRF_deer_pellet_data_clean.csv", row.names = FALSE)
 
 print("Data cleaning and harmonization complete!")

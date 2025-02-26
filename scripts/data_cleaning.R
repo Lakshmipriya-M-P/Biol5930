@@ -1,3 +1,4 @@
+# Load necessary libraries
 library(dplyr)
 library(lubridate)
 library(stringr)
@@ -18,8 +19,17 @@ if (length(missing_columns) > 0) {
   stop(paste("Error: Missing required columns:", paste(missing_columns, collapse = ", ")))
 }
 
-# Convert 'date' column to Date format
-raw_data$date <- parse_date_time(raw_data$date, orders = c("ymd", "mdy", "dmy"))
+# Convert 'date' column to Date format with multiple parsing attempts
+raw_data$date <- suppressWarnings(ymd(raw_data$date))  # First attempt with YYYY-MM-DD
+
+# If still NA, try parsing with alternative formats
+raw_data$date[is.na(raw_data$date)] <- suppressWarnings(mdy(raw_data$date[is.na(raw_data$date)]))
+raw_data$date[is.na(raw_data$date)] <- suppressWarnings(dmy(raw_data$date[is.na(raw_data$date)]))
+
+# Final check for any unparsed dates
+if (any(is.na(raw_data$date))) {
+  warning("Some dates could not be parsed. Check the raw data for inconsistencies.")
+}
 
 # Extract 'year' from 'date' column
 raw_data$year <- year(raw_data$date)

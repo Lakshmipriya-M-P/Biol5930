@@ -1,6 +1,7 @@
 library(dplyr)
 library(lubridate)
 library(stringr)
+library(tidyr)
 
 # Load raw data
 raw_data <- read.csv("data/raw/BRF_deer_pellet_data_RAW.csv", stringsAsFactors = FALSE)
@@ -9,28 +10,27 @@ raw_data <- read.csv("data/raw/BRF_deer_pellet_data_RAW.csv", stringsAsFactors =
 print("Column names in raw_data:")
 print(colnames(raw_data))
 
-# Ensure all required columns exist
-required_columns <- c("year", "date", "transect.location", "transectID", "reader", "pointno", "pellet.count", "notes")
+# Ensure all required columns exist (excluding 'year' since we derive it)
+required_columns <- c("date", "transect.location", "transectID", "reader", "pointno", "pellet.count", "notes")
 missing_columns <- setdiff(required_columns, colnames(raw_data))
 
 if (length(missing_columns) > 0) {
   stop(paste("Error: Missing required columns:", paste(missing_columns, collapse = ", ")))
 }
 
-# Convert 'date' column to standard format
-raw_data$date <- as.character(raw_data$date)
-raw_data$date <- as.Date(parse_date_time(raw_data$date, orders = c("ymd", "mdy", "dmy")), format = "%Y-%m-%d")
+# Convert 'date' column to Date format
+raw_data$date <- parse_date_time(raw_data$date, orders = c("ymd", "mdy", "dmy"))
 
 # Extract 'year' from 'date' column
 raw_data$year <- year(raw_data$date)
 
-# Standardize categorical columns (transect.location, transectID, reader)
+# Standardize categorical columns
 clean_data <- raw_data %>%
   mutate(
-    transect.location = str_to_title(transect.location),  # Capitalize first letter
+    transect.location = str_to_title(str_trim(transect.location)),  # Capitalize first letter & trim spaces
     transectID = as.character(transectID),
-    reader = str_to_lower(reader),  # Convert to lowercase for consistency
-    notes = ifelse(is.na(notes) | notes == "", "No Notes", notes) # Handle missing notes
+    reader = str_to_lower(str_trim(reader)),  # Convert to lowercase & trim spaces
+    notes = replace_na(notes, "No Notes")  # Replace missing notes with "No Notes"
   )
 
 # Convert 'pointno' to integer
@@ -42,7 +42,7 @@ clean_data$pellet.count[is.na(clean_data$pellet.count)] <- 0  # Replace missing 
 
 # Create 'Pellet_Density' variable
 clean_data <- clean_data %>%
-  mutate(Pellet_Density = pellet.count / 1)
+  mutate(Pellet_Density = pellet.count / 1)  # Placeholder: Adjust denominator if needed
 
 # Remove duplicates
 clean_data <- clean_data %>% distinct()

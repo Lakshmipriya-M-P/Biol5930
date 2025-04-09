@@ -1,32 +1,36 @@
 name: Data Cleaning Pipeline
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'scripts/**'
+      - 'data/raw/**'
 
 jobs:
   clean_data:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
 
-      - name: Install dependencies
-        run: Rscript -e "install.packages(c('dplyr', 'lubridate'), dependencies=TRUE)"
+    - name: Install packages
+      run: |
+        Rscript -e 'install.packages("tidyverse", dependencies = TRUE)'
 
-      - name: Verify package installation
-        run: Rscript -e "library(dplyr); library(lubridate); print('Packages loaded successfully')"
+    - name: Run data cleaning script
+      run: Rscript scripts/data_cleaning.R
 
-      - name: Run data cleaning script
-        run: Rscript scripts/data_cleaning.R
-        
-      - name: Check for changes before committing
-        run: |
-          git add data/processed/
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Updated cleaned data"
-            git push origin main
-          fi
+    - name: Configure Git identity
+      run: |
+        git config --global user.name "Lakshmipriya-M-P"
+        git config --global user.email "lmallikarjunapan@slu.edu"
+
+    - name: Commit cleaned data
+      run: |
+        git add data/processed/
+        git commit -m "Auto: cleaned data update"
+        git push
